@@ -4,6 +4,12 @@
 ## Loading and preprocessing the data
 
 ```r
+# Load file
+activity <- read.csv(unz("activity.zip", filename = "activity.csv"))
+
+# Process dates as date class
+activity$date <- as.Date(activity$date)
+
 # Load libraries that are needed:
 library(data.table)
 library (ggplot2)
@@ -28,14 +34,6 @@ library(Hmisc)
 ## 
 ##     format.pval, round.POSIXt, trunc.POSIXt, units
 ```
-
-```r
-# Load file
-activity <- read.csv(unz("activity.zip", filename = "activity.csv"))
-
-# Process dates as date class
-activity$date <- as.Date(activity$date)
-```
   
 
 ## What is mean total number of steps taken per day?
@@ -44,14 +42,16 @@ activity$date <- as.Date(activity$date)
 # Use data table to aggregate steps by date
 DT <- as.data.table(activity)
 dailySteps <- DT[, list(totalSteps = sum(steps, na.rm = T)), by = date]
+```
 
+```r
 # Plot histogram
 g <- ggplot(dailySteps, aes(totalSteps))
 g + geom_histogram(fill = "red4") + 
     labs(title = "Histogram of Daily Steps", x = "Total Number of Steps", y = "Count")
 ```
 
-![](PA1_template_files/figure-html/unnamed-chunk-2-1.png) 
+![](PA1_template_files/figure-html/unnamed-chunk-3-1.png) 
 
 ```r
 # Find mean and median
@@ -72,7 +72,9 @@ intervalSteps <- DT[, list(meanSteps = mean(steps, na.rm = T)), by = interval]
 # in 5 minute intervals is added
 intervalSteps$timeInts <- seq(ISOdatetime(2012,10,1,0,0,0), 
                               ISOdatetime(2012,10,1,23,55,0), by=(60*5))
+```
 
+```r
 # Plot the time sequence 
 h <- ggplot(intervalSteps, aes(timeInts ,meanSteps))
 h + geom_line(color = "red4") + 
@@ -83,7 +85,7 @@ h + geom_line(color = "red4") +
          x = "Intervals", y = "Mean Steps")
 ```
 
-![](PA1_template_files/figure-html/unnamed-chunk-3-1.png) 
+![](PA1_template_files/figure-html/unnamed-chunk-5-1.png) 
 
 ```r
 # Find the interval with the highest average steps
@@ -116,7 +118,9 @@ impDT$steps <- as.integer(impDT$steps)
 
 # Use data table to aggregate steps by date
 impDailySteps <- impDT[, list(totalSteps = sum(steps)), by = date]
+```
 
+```r
 # Plot histogram
 i <- ggplot(impDailySteps, aes(totalSteps))
 i + geom_histogram(fill = "blue4") + 
@@ -124,7 +128,7 @@ i + geom_histogram(fill = "blue4") +
          x = "Total Number of Steps", y = "Count")
 ```
 
-![](PA1_template_files/figure-html/unnamed-chunk-6-1.png) 
+![](PA1_template_files/figure-html/unnamed-chunk-9-1.png) 
 
 ```r
 # Calculate mean and median
@@ -162,7 +166,9 @@ temp2$interval <- seq(ISOdatetime(2012,10,1,0,0,0), ISOdatetime(2012,10,1,23,55,
 
 # Combine the data tables into a single one
 interSteps <- rbind(temp1, temp2)
+```
 
+```r
 # Make panel plot 
 j <- ggplot(interSteps, aes(interval, meanSteps))
 j + geom_line(color = "blue4") + 
@@ -174,7 +180,7 @@ j + geom_line(color = "blue4") +
          x = "Intervals", y = "Mean Steps")
 ```
 
-![](PA1_template_files/figure-html/unnamed-chunk-7-1.png) 
+![](PA1_template_files/figure-html/unnamed-chunk-11-1.png) 
 
 
 

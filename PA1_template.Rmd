@@ -8,18 +8,18 @@ output:
 
 ## Loading and preprocessing the data
 ```{r}  
+# Load file
+activity <- read.csv(unz("activity.zip", filename = "activity.csv"))
+
+# Process dates as date class
+activity$date <- as.Date(activity$date)
+
 # Load libraries that are needed:
 library(data.table)
 library (ggplot2)
 library(scales)
 library(plyr)
 library(Hmisc)
-
-# Load file
-activity <- read.csv(unz("activity.zip", filename = "activity.csv"))
-
-# Process dates as date class
-activity$date <- as.Date(activity$date)
 ```
   
 
@@ -28,7 +28,8 @@ activity$date <- as.Date(activity$date)
 # Use data table to aggregate steps by date
 DT <- as.data.table(activity)
 dailySteps <- DT[, list(totalSteps = sum(steps, na.rm = T)), by = date]
-
+```
+```{r, fig.width=12}
 # Plot histogram
 g <- ggplot(dailySteps, aes(totalSteps))
 g + geom_histogram(fill = "red4") + 
@@ -51,7 +52,8 @@ intervalSteps <- DT[, list(meanSteps = mean(steps, na.rm = T)), by = interval]
 # in 5 minute intervals is added
 intervalSteps$timeInts <- seq(ISOdatetime(2012,10,1,0,0,0), 
                               ISOdatetime(2012,10,1,23,55,0), by=(60*5))
-
+```
+```{r, fig.width=12}
 # Plot the time sequence 
 h <- ggplot(intervalSteps, aes(timeInts ,meanSteps))
 h + geom_line(color = "red4") + 
@@ -88,7 +90,8 @@ impDT$steps <- as.integer(impDT$steps)
 
 # Use data table to aggregate steps by date
 impDailySteps <- impDT[, list(totalSteps = sum(steps)), by = date]
-
+```
+```{r, fig.width=12}
 # Plot histogram
 i <- ggplot(impDailySteps, aes(totalSteps))
 i + geom_histogram(fill = "blue4") + 
@@ -130,7 +133,8 @@ temp2$interval <- seq(ISOdatetime(2012,10,1,0,0,0), ISOdatetime(2012,10,1,23,55,
 
 # Combine the data tables into a single one
 interSteps <- rbind(temp1, temp2)
-
+```
+```{r, fig.width=12}
 # Make panel plot 
 j <- ggplot(interSteps, aes(interval, meanSteps))
 j + geom_line(color = "blue4") + 
