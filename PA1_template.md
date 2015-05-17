@@ -1,20 +1,35 @@
----
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
----
+# Reproducible Research: Peer Assessment 1
 
 
 ## Loading and preprocessing the data
-```{r}  
+
+```r
 # Load libraries that are needed:
 library(data.table)
 library (ggplot2)
 library(scales)
 library(plyr)
 library(Hmisc)
+```
 
+```
+## Loading required package: grid
+## Loading required package: lattice
+## Loading required package: survival
+## Loading required package: Formula
+## 
+## Attaching package: 'Hmisc'
+## 
+## The following objects are masked from 'package:plyr':
+## 
+##     is.discrete, summarize
+## 
+## The following objects are masked from 'package:base':
+## 
+##     format.pval, round.POSIXt, trunc.POSIXt, units
+```
+
+```r
 # Load file
 activity <- read.csv(unz("activity.zip", filename = "activity.csv"))
 
@@ -24,7 +39,8 @@ activity$date <- as.Date(activity$date)
   
 
 ## What is mean total number of steps taken per day?
-``` {r}
+
+```r
 # Use data table to aggregate steps by date
 DT <- as.data.table(activity)
 dailySteps <- DT[, list(totalSteps = sum(steps, na.rm = T)), by = date]
@@ -33,17 +49,22 @@ dailySteps <- DT[, list(totalSteps = sum(steps, na.rm = T)), by = date]
 g <- ggplot(dailySteps, aes(totalSteps))
 g + geom_histogram(fill = "red4") + 
     labs(title = "Histogram of Daily Steps", x = "Total Number of Steps", y = "Count")
+```
 
+![](PA1_template_files/figure-html/unnamed-chunk-2-1.png) 
+
+```r
 # Find mean and median
 meanSteps <- mean(dailySteps$totalSteps)
 medianSteps <- median(dailySteps$totalSteps)
 ```
 
-The mean of the total number of steps taken per day is: `r meanSteps` steps.  
-The median of the total number of steps taken per day is: `r medianSteps` steps.  
+The mean of the total number of steps taken per day is: 9354.2295082 steps.  
+The median of the total number of steps taken per day is: 10395 steps.  
 
 ## What is the average daily activity pattern?
-``` {r}
+
+```r
 # Use data table to find means by interval 
 intervalSteps <- DT[, list(meanSteps = mean(steps, na.rm = T)), by = interval]
 
@@ -60,28 +81,35 @@ h + geom_line(color = "red4") +
                      labels = date_format("%H:%M")) + 
     labs(title = "Mean Number of Steps in 5 Minute Intervals", 
          x = "Intervals", y = "Mean Steps")
+```
 
+![](PA1_template_files/figure-html/unnamed-chunk-3-1.png) 
+
+```r
 # Find the interval with the highest average steps
 maxInterval <- format(intervalSteps$timeInts[[which.max(intervalSteps$meanSteps)]], 
                       "%H:%M")
 ```
-The 5 minute interval with maximum average steps is: `r maxInterval`  
+The 5 minute interval with maximum average steps is: 08:35  
 
 ## Imputing missing values
-``` {r}
+
+```r
 nas <- is.na(activity$steps)
 countNas <- sum(nas)
 ```
-The total number of missing values in the data set is: `r countNas`  
+The total number of missing values in the data set is: 2304  
 
-``` {r}
+
+```r
 # Impute missing values with the mean of each 5 minute interval 
 impDT <- as.data.table(ddply(activity, "interval", mutate, steps = impute(steps, mean)))
 ```
 Missing values are imputed using the mean of the missing value's 5 minute interval.  
 
 
-``` {r}
+
+```r
 # Round the steps to integers
 impDT$steps <- round(impDT$steps)
 impDT$steps <- as.integer(impDT$steps)
@@ -94,20 +122,24 @@ i <- ggplot(impDailySteps, aes(totalSteps))
 i + geom_histogram(fill = "blue4") + 
     labs(title = "Histogram of Daily Steps with Imputed Values", 
          x = "Total Number of Steps", y = "Count")
+```
 
+![](PA1_template_files/figure-html/unnamed-chunk-6-1.png) 
+
+```r
 # Calculate mean and median
 options(scipen=999)
 impMeanSteps <- mean(impDailySteps$totalSteps)
 impMedianSteps <- median(impDailySteps$totalSteps)
-
 ```
-The mean of the total number of steps taken per day is: `r impMeanSteps` steps.  
-The median of the total number of steps taken per day is: `r impMedianSteps` steps.
+The mean of the total number of steps taken per day is: 10765.6393443 steps.  
+The median of the total number of steps taken per day is: 10762 steps.
 
 With the imputed values both, the mean and the median of the number of steps taken per day increased.
 
 ## Are there differences in activity patterns between weekdays and weekends?
-``` {r}
+
+```r
 # Add variable weekday with two factors "weekday" and "weekend" based on the date
 impDT <- mutate(impDT, weekday = ifelse(weekdays(impDT$date) %in% c("Saturday", "Sunday"), "weekend", "weekday"))
 
@@ -140,8 +172,9 @@ j + geom_line(color = "blue4") +
                      labels = date_format("%H:%M")) + 
     labs(title = "Mean Number of Steps in 5 Minute Intervals for Weekdays and Weekends", 
          x = "Intervals", y = "Mean Steps")
-
 ```
+
+![](PA1_template_files/figure-html/unnamed-chunk-7-1.png) 
 
 
 
